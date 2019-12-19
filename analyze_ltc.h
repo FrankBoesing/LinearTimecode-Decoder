@@ -4,9 +4,8 @@
    This Code:
    Copyright (c) 2019, Frank Bösing, f.boesing (at) gmx.de
 
-   Development of this audio library was funded by PJRC.COM, LLC by sales of
-   Teensy and Audio Adaptor boards.  Please support PJRC's efforts to develop
-   open source software by purchasing Teensy or other PJRC products.
+   Please support PJRC's efforts to develop open source software by purchasing
+   Teensy or other PJRC products
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -68,18 +67,18 @@ class AudioAnalyzeLTC : public AudioStream
     }
     
     int minute(ltcframe_t * ltc) {
-      return 10 * ((int) (ltc->data >> 40) & 0x03)  + ((int) (ltc->data >> 32) & 0x0f) ;
+      return 10 * ((int) (ltc->data >> 40) & 0x07)  + ((int) (ltc->data >> 32) & 0x0f) ;
     }
     
     int second(ltcframe_t * ltc) {
-      return 10 * ((int) (ltc->data >> 24) & 0x03)  + ((int) (ltc->data >> 16) & 0x0f) ;
+      return 10 * ((int) (ltc->data >> 24) & 0x07)  + ((int) (ltc->data >> 16) & 0x0f) ;
     }
     
     int frame(ltcframe_t * ltc) {
       return 10 * ((int) (ltc->data >>  8) & 0x03)  + ((int) (ltc->data >>  0) & 0x0f) ;
     }
     
-    inline void decodeBitstream(unsigned newbit);
+    
     virtual void update(void);
 
   private:
@@ -87,6 +86,7 @@ class AudioAnalyzeLTC : public AudioStream
     volatile bool new_output;
     int avsample;
     ltcframe_t ltcframe;
+    inline void decodeBitstream(unsigned newbit);
 };
 
 #endif
