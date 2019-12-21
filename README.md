@@ -10,5 +10,6 @@ A special bit in the linear timecode frame, the biphase mark correction bit, ens
 
 The sound of linear timecode is a jarring and distinctive noise and has been used as a sound-effects shorthand to imply telemetry or computers. 
 
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Manchester_encoding_both_conventions.svg/650px-Manchester_encoding_both_conventions.svg.png)
 ![](docs/ltc.png)
 from: https://en.wikipedia.org/wiki/Linear_timecode
