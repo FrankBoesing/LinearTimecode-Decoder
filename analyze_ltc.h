@@ -38,6 +38,7 @@
 struct ltcframe_t {
   uint64_t data;
   uint16_t sync;
+  uint32_t timestampfirstedge;
 };
 
 class AudioAnalyzeLTC : public AudioStream
@@ -62,23 +63,47 @@ class AudioAnalyzeLTC : public AudioStream
       return tempframe;
     }
 
-    int hour(ltcframe_t * ltc) {
-      return 10 * ((int) (ltc->data >> 56) & 0x03)  + ((int) (ltc->data >> 48) & 0x0f) ;
+
+    //Auxiliary functions:
+
+    int hour(ltcframe_t * ltc)   {
+      return 10 * ((int) (ltc->data >> 56) & 0x03)  + ((int) (ltc->data >> 48) & 0x0f);
     }
-    
     int minute(ltcframe_t * ltc) {
-      return 10 * ((int) (ltc->data >> 40) & 0x07)  + ((int) (ltc->data >> 32) & 0x0f) ;
+      return 10 * ((int) (ltc->data >> 40) & 0x07)  + ((int) (ltc->data >> 32) & 0x0f);
     }
-    
     int second(ltcframe_t * ltc) {
-      return 10 * ((int) (ltc->data >> 24) & 0x07)  + ((int) (ltc->data >> 16) & 0x0f) ;
+      return 10 * ((int) (ltc->data >> 24) & 0x07)  + ((int) (ltc->data >> 16) & 0x0f);
     }
-    
-    int frame(ltcframe_t * ltc) {
-      return 10 * ((int) (ltc->data >>  8) & 0x03)  + ((int) (ltc->data >>  0) & 0x0f) ;
+    int frame(ltcframe_t * ltc)  {
+      return 10 * ((int) (ltc->data >>  8) & 0x03)  + ((int) (ltc->data >>  0) & 0x0f);
     }
-    
-    
+    bool bit10(ltcframe_t * ltc) {
+      return (int) (ltc->data >> 10) & 0x01;
+    }
+    bool bit11(ltcframe_t * ltc) {
+      return (int) (ltc->data >> 11) & 0x01;
+    }
+    bool bit27(ltcframe_t * ltc) {
+      return (int) (ltc->data >> 27) & 0x01;
+    }
+    bool bit43(ltcframe_t * ltc) {
+      return (int) (ltc->data >> 43) & 0x01;
+    }
+    bool bit58(ltcframe_t * ltc) {
+      return (int) (ltc->data >> 58) & 0x01;
+    }
+    bool bit59(ltcframe_t * ltc) {
+      return (int) (ltc->data >> 59) & 0x01;
+    }
+
+    uint32_t userdata(ltcframe_t * ltc) {
+      return  ((int) (ltc->data >>  4) & 0x0000000fUL) | ((int) (ltc->data >>  8) & 0x000000f0UL) |
+              ((int) (ltc->data >> 12) & 0x00000f00UL) | ((int) (ltc->data >> 16) & 0x0000f000UL) |
+              ((int) (ltc->data >> 20) & 0x000f0000UL) | ((int) (ltc->data >> 24) & 0x00f00000UL) |
+              ((int) (ltc->data >> 28) & 0x0f000000UL) | ((int) (ltc->data >> 32) & 0xf0000000UL);
+    }
+
     virtual void update(void);
 
   private:

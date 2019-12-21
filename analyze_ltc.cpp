@@ -50,15 +50,17 @@ inline void AudioAnalyzeLTC::decodeBitstream(unsigned newbit) {
     ltc.sync = (ltc.sync << 1) | newbit;
 
     if (ltc.sync == 0x3FFD) {
+      ltc.timestampfirstedge = micros();
+      ltcframe = ltc;
+      new_output = true;
       bitcounter = 0;
       forward = true;
+    } else if (ltc.sync == 0xBFFC) {
+      ltc.timestampfirstedge = ltc.micros();
       ltcframe = ltc;
       new_output = true;
-    } else if (ltc.sync == 0xBFFC) {
       bitcounter = 0;
       forward = false;
-      ltcframe = ltc;
-      new_output = true;
     }
 
   }
@@ -77,7 +79,7 @@ void AudioAnalyzeLTC::update(void)
   end = p + AUDIO_BLOCK_SAMPLES;
 
   static int clkcnt = 0, avclk = 0, newbit = 0;
-  static boolean clkstate = false, clkstatelast = false;
+  static bool clkstate = false, clkstatelast = false;
   int minsample = 32767, maxsample = -32768;
 
   do {
