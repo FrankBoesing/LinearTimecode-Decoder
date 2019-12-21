@@ -35,7 +35,8 @@ inline void AudioAnalyzeLTC::decodeBitstream(unsigned newbit) {
   static ltcframe_t ltc;
   static int bitcounter = 0;
   static bool forward = true;
-
+  static uint32_t lastts = 0;
+  
   if (bitcounter < 64) {
 
     if (forward)
@@ -50,13 +51,15 @@ inline void AudioAnalyzeLTC::decodeBitstream(unsigned newbit) {
     ltc.sync = (ltc.sync << 1) | newbit;
 
     if (ltc.sync == 0x3FFD) {
-      ltc.timestampfirstedge = micros();
+      ltc.timestampfirstedge = lastts;
+      lastts = micros();
       ltcframe = ltc;
       new_output = true;
       bitcounter = 0;
       forward = true;
     } else if (ltc.sync == 0xBFFC) {
-      ltc.timestampfirstedge = ltc.micros();
+      ltc.timestampfirstedge = lastts;
+      lastts = micros();
       ltcframe = ltc;
       new_output = true;
       bitcounter = 0;
