@@ -14,7 +14,7 @@
 */
 
 #define USE_LTC_INPUT //comment-out for generation only
-float fps = 30;
+float fps = 24;
 const int ltcPin = 1;
 const int syncPin = 0;
 
@@ -56,7 +56,6 @@ void genLtc() {
   if (clkCnt++ >= 2 * 80) {
     //ltcTimer.end();
     clkCnt = 0;
-    //Serial.println(".");
     return;
   }
 
@@ -73,11 +72,9 @@ void genLtc() {
   }
 
   if ( (bitval == 1) || ( (bitval == 0) && (clkCnt & 0x01) ) == 0) {
-    state = (state + 1) & 0x01; // toggle state
+    state = !state; // toggle state
     digitalWriteFast(ltcPin, state);
   }
-
-  //if (clkCnt & 0x01) Serial.print(bitval);
 
 }
 
@@ -100,6 +97,10 @@ int getParity(uint64_t n)
    Gets called by rising edge of syncPin
 */
 void startLtc() {
+
+
+  ltcTimer.begin(genLtc, ltcTimer_freq);
+  ltcTimer.priority(0);
 
   int t, t10;
   uint64_t data = ltc.data;
@@ -146,8 +147,6 @@ void startLtc() {
 
   ltc.data = data;
 
-  ltcTimer.begin(genLtc, ltcTimer_freq);
-  ltcTimer.priority(16);
 }
 
 void initLtcData()
@@ -158,8 +157,8 @@ void initLtcData()
 
 void genFpsSync() {
   static int state = 0;
-  state = (state  + 1) & 0x01; // toggle state
-  digitalWriteFast(syncPin, state & 0x01);
+  state = !state; // toggle state
+  digitalWriteFast(syncPin, state);
 }
 
 void loop() {
@@ -186,11 +185,9 @@ void setup() {
   pinMode(ltcPin, OUTPUT);
   Serial.begin(9600);
   initLtcData();
-  ltcTimer_freq = (1.0f / (2 * 80 * (fps ))) * 1000000.0f - 0.5f;// -1: make it a tiny bit faster than needed to allow syncing
+  ltcTimer_freq = (1.0f / (2 * 80 * (fps ))) * 1000000.0f - 0.125f;// -1: make it a tiny bit faster than needed to allow syncing
   fpsTimer.begin(&genFpsSync, (1.0f / (2 * fps)) * 1000000.0f);
-  fpsTimer.priority(32);
+  fpsTimer.priority(0);
   attachInterrupt(digitalPinToInterrupt(syncPin), &startLtc, RISING);
-
-  delay(1500);
-  Serial.println("Hello Tom");
+  NVIC_SET_PRIORITY(88, 0); //set GPIO-INT-Priority for Pin 1
 }
