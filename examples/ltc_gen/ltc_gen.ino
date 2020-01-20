@@ -138,7 +138,7 @@ void startLtc() {
   data |= (uint64_t)((t - t10 * 10) & 0x0f) << 48;
 
   //set parity:
-  int parity = !getParity(data);
+  int parity = (!getParity(data)) & 0x01;
   if ((int) fps == 25) {
     data |= (uint64_t) parity << 59;
   } else {
