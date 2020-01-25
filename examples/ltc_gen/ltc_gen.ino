@@ -184,10 +184,23 @@ void setup() {
   pinMode(syncPin, OUTPUT);
   pinMode(ltcPin, OUTPUT);
   Serial.begin(9600);
+  ltcTimer_freq = (1.0f / (2 * 80 * (fps ))) * 1000000.0f - 0.125f;// -0.125: make it a tiny bit faster than needed to allow syncing
+  
   initLtcData();
-  ltcTimer_freq = (1.0f / (2 * 80 * (fps ))) * 1000000.0f - 0.125f;// -1: make it a tiny bit faster than needed to allow syncing
+  //set frame number to last frame to force roll-over with new second()
+  ltc.data &= 0xf0f0f0f0f0f0fcf0ULL; //delete all dynamic data in frame
+  int t, t10;
+  t = fps;
+  t10 = t / 10;
+  ltc.data |= (t10 & 0x03) << 8;
+  ltc.data |= ((t - t10 * 10));    
+  //now wait for seconds-change 
+  int secs = second();
+  while (secs == second()) {;}  
+  
+  //start timer and pin-interrupt:
   fpsTimer.begin(&genFpsSync, (1.0f / (2 * fps)) * 1000000.0f);
-  fpsTimer.priority(0);
+  fpsTimer.priority(0);  
   attachInterrupt(digitalPinToInterrupt(syncPin), &startLtc, RISING);
   NVIC_SET_PRIORITY(88, 0); //set GPIO-INT-Priority for Pin 1
 }
